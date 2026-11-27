@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+
+{% block title %}Quản trị cơ sở dữ liệu - HQN Software{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column gap-3">
+    <!-- Breadcrumb & Admin User Status Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <nav class="small text-uppercase" aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="/portal/home" class="o_psd_breadcrumb_link">Trang chủ tra cứu</a>
+                </li>
+                <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Quản trị cơ sở dữ liệu</li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                <i class="fa fa-user-circle me-1"></i> {{ session.get('admin_user', 'admin') }}
+            </span>
+            <a href="/portal/home" class="btn btn-sm btn-outline-secondary" title="Xem trang tra cứu công khai">
+                <i class="fa fa-external-link me-1"></i> Cổng tra cứu
+            </a>
+            <a href="/admin/logout" class="btn btn-sm btn-outline-danger" title="Đăng xuất khỏi trang quản trị">
+                <i class="fa fa-sign-out me-1"></i> Đăng xuất
+            </a>
+        </div>
+    </div>
+
+    <!-- Header info banner -->
+    <div class="card border-0 shadow-sm bg-white p-4 rounded-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <h4 class="fw-bold mb-1 text-dark"><i class="fa fa-database text-primary me-2"></i>Quản trị cơ sở dữ liệu bản quyền - HQN Software</h4>
+                <p class="text-muted mb-0 small">Thêm mới, cập nhật, xóa và quản lý danh sách số Seri vật lý & Key điện tử ESD.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-success fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkImportModal">
+                    <i class="fa fa-file-excel-o me-1"></i> Import Lô Key Doanh Nghiệp (Excel)
+                </button>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPhysicalModal">
+                    <i class="fa fa-plus-circle me-1"></i> Thêm Seri Vật Lý
+                </button>
+                <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#addEsdModal">
+                    <i class="fa fa-plus-circle me-1"></i> Thêm Key ESD
+                </button>
+                <button type="button" class="btn btn-outline-danger shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteContractModal">
+                    <i class="fa fa-trash-o me-1"></i> Xóa Theo Hợp Đồng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Bar (Admin Only) -->
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle p-3 bg-primary bg-opacity-10 text-primary">
+                        <i class="fa fa-barcode fa-2x"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-bold">Seri Vật Lý Trong DB</div>
+                        <div class="fs-4 fw-bold text-dark">{{ stats.total_physical if stats else physical_list|length }} số seri</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle p-3 bg-info bg-opacity-10 text-info">
+                        <i class="fa fa-key fa-2x"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-bold">Key ESD Điện Tử Trong DB</div>
+                        <div class="fs-4 fw-bold text-dark">{{ stats.total_esd if stats else esd_list|length }} mã key / giao dịch</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-3 bg-white rounded-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle p-3 bg-success bg-opacity-10 text-success">
+                        <i class="fa fa-check-circle fa-2x"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-bold">Lượt Tra Cứu Hợp Lệ</div>
+                        <div class="fs-4 fw-bold text-dark">{{ stats.successful_searches if stats else 0 }} / {{ stats.total_searches if stats else 0 }} lượt</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert notifications -->
+    {% if message %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa fa-check-circle me-1"></i> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa fa-exclamation-triangle me-1"></i> {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Tabs for Physical vs ESD -->
+    <ul class="nav nav-pills mb-2" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-semibold" id="tab-physical-btn" data-bs-toggle="tab" data-bs-target="#tab-physical" type="button" role="tab">
+                <i class="fa fa-barcode me-1"></i> Danh sách Seri Vật Lý ({{ physical_list|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="tab-esd-btn" data-bs-toggle="tab" data-bs-target="#tab-esd" type="button" role="tab">
+                <i class="fa fa-key me-1"></i> Danh sách Key ESD Điện Tử ({{ esd_list|length }})
+            </button>
+        </li>
+        <li class="nav-item ms-auto" role="presentation">
+            <form action="/admin/reseed" method="POST" onsubmit="return confirm('Bạn có chắc muốn nạp lại dữ liệu mẫu gốc ban đầu? Các dữ liệu tự thêm sẽ bị ghi đè.')">
+                <button type="submit" class="btn btn-outline-warning btn-sm">
+                    <i class="fa fa-refresh me-1"></i> Khôi phục dữ liệu mẫu HQN
+                </button>
+            </form>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="adminTabContent">
+        <!-- Tab 1: Physical Serial Licenses -->
+        <div class="tab-pane fade show active" id="tab-physical" role="tabpanel">
+            <div class="card border shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:50px;">ID</th>
+                                    <th>Số Seri (S/N)</th>
+                                    <th>Mã Part</th>
+                                    <th>Tên Tiếng Việt</th>
+                                    <th>Xuất Xứ</th>
+                                    <th>Ngày Phân Phối</th>
+                                    <th>Đại lý / Ghi chú</th>
+                                    <th style="width:80px; text-align:center;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in physical_list %}
+                                <tr>
+                                    <td class="text-muted small">{{ row.id }}</td>
+                                    <td><strong class="font-monospace text-primary">{{ row.serial_number }}</strong></td>
+                                    <td><span class="badge bg-light text-dark border font-monospace">{{ row.product_code }}</span></td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">{{ row.name_vn }}</div>
+                                        <div class="text-muted small">{{ row.name_en }}</div>
+                                    </td>
+                                    <td>{{ row.country_name }}</td>
+                                    <td class="small">{{ row.distribute_date or '—' }}</td>
+                                    <td class="small text-muted">{{ row.customer_or_reseller or '—' }}</td>
+                                    <td style="text-align:center;">
+                                        <form action="/admin/delete/physical/{{ row.id }}" method="POST" onsubmit="return confirm('Xóa số seri này khỏi cơ sở dữ liệu?')">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">Chưa có bản ghi nào.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: ESD Licenses -->
+        <div class="tab-pane fade" id="tab-esd" role="tabpanel">
+            <div class="card border shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:50px;">ID</th>
+                                    <th>Mã Giao Dịch</th>
+                                    <th>Khóa Kích Hoạt (Key)</th>
+                                    <th>Mã Part</th>
+                                    <th>Tên Sản Phẩm</th>
+                                    <th>Thời Gian Cấp</th>
+                                    <th>Đại Lý</th>
+                                    <th style="width:80px; text-align:center;">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in esd_list %}
+                                <tr>
+                                    <td class="text-muted small">{{ row.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <strong class="font-monospace text-primary">{{ row.transaction_code }}</strong>
+                                            <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-1 text-decoration-none"
+                                                    title="Xóa toàn bộ key thuộc hợp đồng {{ row.transaction_code }}"
+                                                    onclick="openDeleteContractModal('{{ row.transaction_code }}')">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td><span class="font-monospace text-success fw-bold">{{ row.esd_key }}</span></td>
+                                    <td><span class="badge bg-light text-dark border font-monospace">{{ row.product_code }}</span></td>
+                                    <td>
+                                        <div class="fw-semibold text-dark">{{ row.name_vn }}</div>
+                                        <div class="text-muted small">{{ row.name_en }}</div>
+                                    </td>
+                                    <td class="small font-monospace">{{ row.transaction_date }}</td>
+                                    <td class="small text-muted">{{ row.reseller_name or '—' }}</td>
+                                    <td style="text-align:center;">
+                                        <form action="/admin/delete/esd/{{ row.id }}" method="POST" onsubmit="return confirm('Xóa key ESD này khỏi cơ sở dữ liệu?')">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted">Chưa có bản ghi nào.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add Physical -->
+<div class="modal fade" id="addPhysicalModal" tabindex="-1" aria-labelledby="addPhysicalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form action="/admin/add/physical" method="POST" class="modal-content rounded-3 border-0 shadow">
+            <div class="modal-header modal-header-psd text-white">
+                <h5 class="modal-title fw-bold" id="addPhysicalLabel"><i class="fa fa-barcode me-2"></i>Thêm số Seri Key vật lý</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Số Seri (S/N) *</label>
+                        <input type="text" name="serial_number" class="form-control" placeholder="Ví dụ: SN-WIN11-998822" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Mã Part (Part Number) *</label>
+                        <input type="text" name="product_code" class="form-control" placeholder="Ví dụ: FQC-10528" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên tiếng Việt *</label>
+                        <input type="text" name="name_vn" class="form-control" placeholder="Ví dụ: Phần mềm Windows 11 Pro 64-bit OEM" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên tiếng Anh *</label>
+                        <input type="text" name="name_en" class="form-control" placeholder="Ví dụ: Windows 11 Pro 64Bit Eng Intl 1pk DSP OEI DVD" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Xuất Xứ *</label>
+                        <input type="text" name="country_name" class="form-control" placeholder="Ví dụ: Singapore, Ireland..." value="Singapore" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ngày phân phối</label>
+                        <input type="date" name="distribute_date" class="form-control" value="2024-10-15">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Đại lý nhận hàng</label>
+                        <input type="text" name="customer_or_reseller" class="form-control" placeholder="Ví dụ: Phong Vũ, FPT Shop...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Ghi chú</label>
+                        <input type="text" name="notes" class="form-control" placeholder="Ghi chú thêm...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save me-1"></i> Lưu bản ghi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Add ESD -->
+<div class="modal fade" id="addEsdModal" tabindex="-1" aria-labelledby="addEsdLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form action="/admin/add/esd" method="POST" class="modal-content rounded-3 border-0 shadow">
+            <div class="modal-header modal-header-psd text-white">
+                <h5 class="modal-title fw-bold" id="addEsdLabel"><i class="fa fa-key me-2"></i>Thêm Key bản quyền điện tử ESD</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Khóa kích hoạt (Mã Key 25 ký tự) *</label>
+                        <input type="text" name="esd_key" class="form-control font-monospace" placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Mã giao dịch ESD (Origin Name) *</label>
+                        <input type="text" name="transaction_code" class="form-control font-monospace" placeholder="Ví dụ: HQN-ESD-TX99001" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Mã Part *</label>
+                        <input type="text" name="product_code" class="form-control" placeholder="Ví dụ: HAV-00200" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên tiếng Việt *</label>
+                        <input type="text" name="name_vn" class="form-control" placeholder="Ví dụ: Bản quyền Office Home & Business 2024 ESD" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tên tiếng Anh *</label>
+                        <input type="text" name="name_en" class="form-control" placeholder="Ví dụ: Office Home and Business 2024 All Lng ESD" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Thời gian giao dịch</label>
+                        <input type="text" name="transaction_date" class="form-control" placeholder="YYYY-MM-DD HH:MM:SS" value="2024-11-01 10:00:00">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Đại lý phân phối</label>
+                        <input type="text" name="reseller_name" class="form-control" placeholder="Ví dụ: Thế Giới Di Động ESD">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email khách hàng (nếu có)</label>
+                        <input type="email" name="customer_email" class="form-control" placeholder="customer@domain.vn">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-info text-white"><i class="fa fa-save me-1"></i> Lưu Key ESD</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Bulk Import from Excel / List -->
+<div class="modal fade" id="bulkImportModal" tabindex="-1" aria-labelledby="bulkImportLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <form action="/admin/import/bulk" method="POST" enctype="multipart/form-data" class="modal-content rounded-3 border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa fa-file-excel-o fa-lg"></i>
+                    <h5 class="modal-title fw-bold" id="bulkImportLabel">Import Lô Key Bản Quyền Cho Doanh Nghiệp (Excel / Danh sách)</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4 bg-light">
+                <div class="row g-4">
+                    <!-- Column 1: Manual Metadata Input -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm p-4 bg-white rounded-3 h-100">
+                            <h6 class="fw-bold text-dark text-uppercase border-bottom pb-2 mb-3">
+                                <i class="fa fa-edit text-primary me-2"></i>1. Thông Tin Chung Của Lô Cấp Phép
+                            </h6>
+
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Loại Key cấp phép *</label>
+                                <div class="d-flex gap-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="license_type" id="import_type_esd" value="esd" checked>
+                                        <label class="form-check-label fw-bold text-dark" for="import_type_esd">
+                                            <i class="fa fa-key text-info me-1"></i> Key điện tử (ESD)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="license_type" id="import_type_physical" value="physical">
+                                        <label class="form-check-label fw-bold text-dark" for="import_type_physical">
+                                            <i class="fa fa-barcode text-primary me-1"></i> Key vật lý (Số Seri)
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-5">
+                                    <label class="form-label fw-semibold small">Mã Part *</label>
+                                    <input type="text" name="product_code" id="import_product_code" class="form-control font-monospace" placeholder="FQC-10572" required>
+                                </div>
+                                <div class="col-md-7">
+                                    <label class="form-label fw-semibold small">Xuất Xứ</label>
+                                    <input type="text" name="country_name" id="import_country" class="form-control" value="Singapore">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Tên sản phẩm tiếng Việt *</label>
+                                <input type="text" name="name_vn" id="import_name_vn" class="form-control" placeholder="Ví dụ: Bản quyền Windows 11 Pro điện tử (ESD)" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Tên sản phẩm tiếng Anh</label>
+                                <input type="text" name="name_en" id="import_name_en" class="form-control" placeholder="Ví dụ: Windows 11 Professional ESD 32-bit/64-bit All Lng">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Tên Doanh nghiệp sử dụng (End-User) *</label>
+                                <input type="text" name="end_user" class="form-control fw-bold" placeholder="Ví dụ: Tập đoàn Viettel - Khối Kỹ Thuật" required>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-md-7">
+                                    <label class="form-label fw-semibold small">Mã Giao Dịch / Hợp Đồng</label>
+                                    <div class="input-group">
+                                        <input type="text" name="transaction_code" id="import_tx_code" class="form-control font-monospace" placeholder="HQN-ESD-TX2024-001">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="generateTxCode()" title="Tạo mã ngẫu nhiên"><i class="fa fa-magic"></i></button>
+                                    </div>
+                                    <div class="form-text small">Tự sinh nếu để trống (cho ESD).</div>
+                                </div>
+                                <div class="col-md-5">
+                                    <label class="form-label fw-semibold small">Thời gian cấp</label>
+                                    <input type="text" name="transaction_date" id="import_date" class="form-control small">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small">Email nhận bản quyền (Doanh nghiệp)</label>
+                                <input type="email" name="customer_email" class="form-control" placeholder="it.admin@doanhnghiep.vn">
+                            </div>
+
+                            <div class="mb-0">
+                                <label class="form-label fw-semibold small">Ghi chú hợp đồng</label>
+                                <input type="text" name="notes" class="form-control" placeholder="Hợp đồng số 12/2024/HQN...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Key Input (Excel file upload OR Paste list) -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm p-4 bg-white rounded-3 h-100 d-flex flex-column">
+                            <h6 class="fw-bold text-dark text-uppercase border-bottom pb-2 mb-3">
+                                <i class="fa fa-list-ol text-success me-2"></i>2. Nhập Danh Sách Key
+                            </h6>
+
+                            <ul class="nav nav-pills mb-3" id="importSourceTabs" role="tablist">
+                                <li class="nav-item flex-fill text-center">
+                                    <button class="nav-link active w-100 fw-semibold" id="tab-excel-btn" data-bs-toggle="pill" data-bs-target="#tab-excel" type="button" role="tab">
+                                        <i class="fa fa-file-excel-o me-1 text-success"></i> Tải lên file Excel (.xlsx)
+                                    </button>
+                                </li>
+                                <li class="nav-item flex-fill text-center">
+                                    <button class="nav-link w-100 fw-semibold" id="tab-paste-btn" data-bs-toggle="pill" data-bs-target="#tab-paste" type="button" role="tab">
+                                        <i class="fa fa-clipboard me-1 text-primary"></i> Dán cột từ Excel
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content flex-grow-1" id="importSourceContent">
+                                <!-- Option 1: File Upload -->
+                                <div class="tab-pane fade show active" id="tab-excel" role="tabpanel">
+                                    <div class="p-3 border border-2 border-dashed rounded-3 text-center mb-3 bg-light">
+                                        <i class="fa fa-cloud-upload fa-3x text-success mb-2"></i>
+                                        <div class="fw-bold mb-1">Chọn file Excel chứa cột Key</div>
+                                        <div class="text-muted small mb-3">Hỗ trợ các định dạng .xlsx, .xls, .csv, .txt</div>
+                                        <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls,.csv,.txt">
+                                    </div>
+
+                                    <div class="alert alert-info py-2 small mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span><i class="fa fa-info-circle me-1"></i> Bảng Excel chỉ cần <strong>1 cột chứa các mã Key</strong>.</span>
+                                            <a href="/admin/sample-excel" class="btn btn-sm btn-outline-success fw-semibold bg-white">
+                                                <i class="fa fa-download me-1"></i> Tải file mẫu
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Option 2: Copy Paste -->
+                                <div class="tab-pane fade h-100" id="tab-paste" role="tabpanel">
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-semibold text-muted">Dán danh sách key trực tiếp (mỗi dòng 1 key):</label>
+                                        <textarea name="pasted_keys" class="form-control font-monospace" rows="9" 
+                                                  placeholder="VK7JG-NPHTM-C97JM-9MPGT-3V66T&#10;W269N-WFGWX-YVC9B-4J6C9-T83GX&#10;B7Q2P-K8NYM-Q3TWC-94X2R-V8HMF&#10;..."></textarea>
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="fa fa-lightbulb-o text-warning me-1"></i> Bạn có thể bôi đen cả cột Key trong Excel rồi nhấn <code>Ctrl + V</code> dán trực tiếp vào đây.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto pt-3 border-top">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted small">Hệ thống sẽ tự động lọc sạch khoảng trắng và bỏ qua key trùng lặp.</div>
+                                    <button type="submit" class="btn btn-success px-4 py-2 fw-bold shadow">
+                                        <i class="fa fa-cloud-upload me-1"></i> Tiến hành Import
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Xóa Lô Theo Hợp Đồng -->
+<div class="modal fade" id="deleteContractModal" tabindex="-1" aria-labelledby="deleteContractLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="/admin/delete/contract" method="POST" class="modal-content rounded-3 border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="deleteContractLabel">
+                    <i class="fa fa-exclamation-triangle me-2"></i>Xóa Toàn Bộ Key Theo Hợp Đồng
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="alert alert-warning border-0 rounded-3 small mb-3">
+                    <i class="fa fa-info-circle me-1"></i>
+                    Tính năng này dùng khi <strong>nhập nhầm lô key / sai file Excel</strong>. Hệ thống sẽ xóa toàn bộ các key có cùng Mã Hợp Đồng / Giao Dịch được chọn.
+                </div>
+
+                <!-- Chọn từ danh sách hợp đồng có sẵn -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-uppercase text-muted">1. Chọn nhanh từ hợp đồng hiện có trong DB</label>
+                    <select class="form-select" id="contract_select" onchange="onContractSelectChange(this)">
+                        <option value="">-- Chọn mã hợp đồng / giao dịch --</option>
+                        {% for c in contracts_summary %}
+                        <option value="{{ c.transaction_code }}">
+                            {{ c.transaction_code }} ({{ c.key_count }} key - {{ c.name_vn }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Hoặc nhập tay -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-uppercase text-muted">2. Hoặc nhập chính xác Mã Hợp Đồng cần xóa *</label>
+                    <input type="text" name="transaction_code" id="delete_transaction_code"
+                           class="form-control font-monospace fw-bold"
+                           placeholder="Ví dụ: HQN20261119" required>
+                </div>
+
+                <div id="delete_preview_alert" class="alert alert-danger border-0 rounded-3 py-2 px-3 small d-none">
+                    <i class="fa fa-trash me-1"></i> Xác nhận: Sẽ xóa toàn bộ key của hợp đồng <strong id="preview_contract_code" class="font-monospace"></strong>!
+                </div>
+            </div>
+            <div class="modal-footer bg-white border-top">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="submit" class="btn btn-danger fw-bold" onclick="return confirm('Bạn có chắc chắn muốn xóa TOÀN BỘ key của hợp đồng này? Thao tác không thể hoàn tác!')">
+                    <i class="fa fa-trash me-1"></i> Xác Nhận Xóa Toàn Bộ Key
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openDeleteContractModal(code) {
+    const modalElem = document.getElementById('deleteContractModal');
+    if (!modalElem) return;
+    const input = document.getElementById('delete_transaction_code');
+    const select = document.getElementById('contract_select');
+    if (input) input.value = code;
+    if (select) {
+        select.value = code;
+        onContractSelectChange(select);
+    }
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElem);
+    modal.show();
+}
+
+function onContractSelectChange(selectElem) {
+    const code = selectElem.value;
+    const input = document.getElementById('delete_transaction_code');
+    const preview = document.getElementById('delete_preview_alert');
+    const previewCode = document.getElementById('preview_contract_code');
+    if (code) {
+        if (input) input.value = code;
+        if (preview && previewCode) {
+            previewCode.textContent = code;
+            preview.classList.remove('d-none');
+        }
+    } else {
+        if (preview) preview.classList.add('d-none');
+    }
+}
+
+function generateTxCode() {
+    const d = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const code = 'HQN-ESD-TX' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('import_tx_code').value = code;
+}
+
+// Auto set current timestamp
+document.addEventListener("DOMContentLoaded", function() {
+    const dateInput = document.getElementById('import_date');
+    if (dateInput && !dateInput.value) {
+        const now = new Date();
+        const pad = (n) => n.toString().padStart(2, '0');
+        dateInput.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    }
+});
+</script>
+{% endblock %}

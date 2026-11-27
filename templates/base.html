@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi" dir="ltr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Cổng tra cứu bản quyền Microsoft - HQN Software{% endblock %}</title>
+    <link rel="shortcut icon" href="/static/img/logo.png" type="image/png" />
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Custom Portal CSS -->
+    <link rel="stylesheet" href="/static/css/portal.css" />
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div id="wrapwrap">
+        <div id="wrap" class="o_psd_portal d-flex">
+            <!-- Sidebar Desktop -->
+            <aside class="o_psd_sidebar d-none d-lg-flex flex-column flex-shrink-0">
+                <a href="/portal/home" class="o_psd_brand d-flex align-items-center gap-2 px-3 text-decoration-none">
+                    <img class="rounded flex-shrink-0" style="height:48px;width:auto;max-width:55px;object-fit:contain;"
+                        src="/static/img/logo.png" alt="HQN Software" />
+                    <div class="d-flex flex-column text-white">
+                        <span style="font-size:0.95rem;font-weight:700;line-height:1.2;letter-spacing:0.02em;">HQN SOFTWARE</span>
+                        <span style="font-size:0.68rem;color:#94a3b8;letter-spacing:0.04em;">LICENSE PORTAL</span>
+                    </div>
+                </a>
+
+                <div class="o_psd_group px-3 pt-3 pb-1">Tra cứu bản quyền</div>
+                <nav class="nav flex-column">
+                    <a href="/portal/home"
+                        class="o_psd_link d-flex align-items-center gap-2 {% if active_page == 'home' %}active{% endif %}">
+                        <i class="fa fa-home fa-fw" aria-hidden="true"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                    <a href="/portal/search/serial"
+                        class="o_psd_link d-flex align-items-center gap-2 {% if active_page == 'serial' %}active{% endif %}">
+                        <i class="fa fa-barcode fa-fw" aria-hidden="true"></i>
+                        <span>Tra cứu số seri</span>
+                    </a>
+                    <a href="/portal/search/esd"
+                        class="o_psd_link d-flex align-items-center gap-2 {% if active_page == 'esd' %}active{% endif %}">
+                        <i class="fa fa-key fa-fw" aria-hidden="true"></i>
+                        <span>Tra cứu số ESD</span>
+                    </a>
+                </nav>
+
+                <div class="mt-auto p-3 text-white-50 small border-top border-secondary border-opacity-25">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <img src="/static/img/microsoft_logo.png" alt="Microsoft" style="height:20px;width:auto;" />
+                        <span class="text-white fw-semibold" style="font-size:0.75rem;">Microsoft Licensing</span>
+                    </div>
+                    <div style="font-size:0.7rem;color:#94a3b8;">Hệ thống xác thực bản quyền chính hãng HQN Software</div>
+                </div>
+            </aside>
+
+            <!-- Main Content Container -->
+            <div class="o_psd_content flex-grow-1 min-w-0 d-flex flex-column bg-body-tertiary">
+                <!-- Topbar -->
+                <header class="o_psd_topbar sticky-top d-flex align-items-center gap-2 px-3 flex-shrink-0">
+                    <button type="button" class="btn btn-sm o_psd_btn-ghost d-lg-none" data-bs-toggle="offcanvas"
+                        data-bs-target="#psdSidebarMobile" aria-label="Mở menu">
+                        <i class="fa fa-bars" aria-hidden="true"></i>
+                    </button>
+
+                    <div class="d-flex align-items-center gap-2 d-none d-md-flex text-white">
+                        <span
+                            class="badge bg-primary bg-opacity-25 text-info border border-info border-opacity-25 fw-normal px-2 py-1"
+                            style="font-size:0.75rem;">PORTAL</span>
+                        <span class="fw-medium text-white-50" style="font-size:0.88rem;">Hệ thống tra cứu bản quyền phần
+                            mềm Microsoft - HQN Software</span>
+                    </div>
+
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <a href="/portal/search/serial"
+                            class="btn btn-sm btn-outline-light d-none d-sm-inline-flex align-items-center gap-1"
+                            style="font-size:0.8rem;">
+                            <i class="fa fa-barcode"></i> Seri vật lý
+                        </a>
+                        <a href="/portal/search/esd"
+                            class="btn btn-sm btn-outline-info d-none d-sm-inline-flex align-items-center gap-1"
+                            style="font-size:0.8rem;">
+                            <i class="fa fa-key"></i> Key điện tử ESD
+                        </a>
+
+                        <div class="dropdown">
+                            <button type="button"
+                                class="o_psd_avatar btn btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Tài khoản">
+                                <i class="fa fa-user-o" aria-hidden="true"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm mt-2">
+                                <li class="px-3 py-1 text-muted small fw-semibold">TRA CỨU BẢN QUYỀN</li>
+                                <li><a class="dropdown-item" href="/portal/search/serial"><i
+                                            class="fa fa-barcode fa-fw me-2 text-secondary"></i>Tra cứu số Seri</a></li>
+                                <li><a class="dropdown-item" href="/portal/search/esd"><i
+                                            class="fa fa-key fa-fw me-2 text-info"></i>Tra cứu số ESD</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="/admin/login"><i
+                                            class="fa fa-lock fa-fw me-2 text-primary"></i>Đăng nhập Quản trị</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Page Body -->
+                <main class="flex-grow-1 py-3 py-lg-3 px-3 px-lg-4">
+                    {% block content %}{% endblock %}
+                </main>
+
+                <!-- Footer -->
+                <footer class="pb-4 px-3 px-lg-4">
+                    <div class="border-top pt-3 text-muted small">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-lg-6">
+                                <div class="fw-semibold text-dark mb-1">
+                                    &copy; 2026 HỆ THỐNG XÁC THỰC BẢN QUYỀN MICROSOFT - HQN SOFTWARE
+                                </div>
+                                <div class="d-flex align-items-start gap-2 text-secondary">
+                                    <i class="fa fa-map-marker text-danger mt-1"></i>
+                                    <span><strong>Địa chỉ:</strong> NO04-LK192 Khu LK27-28, P. Dương Nội, Hà Nội</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 text-lg-end">
+                                <div class="d-flex flex-wrap justify-content-lg-end gap-3">
+                                    <span><i class="fa fa-phone text-primary me-1"></i><strong>Hotline:</strong> <a
+                                            href="tel:0913370239"
+                                            class="text-decoration-none text-dark fw-bold">0913.370.239</a></span>
+                                    <span><i class="fa fa-envelope text-info me-1"></i><strong>Email:</strong> <a
+                                            href="mailto:hqngroup@gmail.com"
+                                            class="text-decoration-none text-primary">hqngroup@gmail.com</a></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+
+            <!-- Offcanvas Mobile Sidebar -->
+            <div class="offcanvas offcanvas-start o_psd_sidebar d-lg-none" tabindex="-1" id="psdSidebarMobile"
+                aria-labelledby="psdSidebarMobileLabel">
+                <div class="offcanvas-header pb-0 border-bottom border-secondary border-opacity-25">
+                    <a href="/portal/home" class="text-white text-decoration-none d-flex align-items-center gap-2">
+                        <img class="rounded flex-shrink-0" style="height:45px;width:auto;" src="/static/img/logo.png"
+                            alt="Logo" />
+                        <span class="fw-bold">HQN SOFTWARE</span>
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"
+                        aria-label="Đóng"></button>
+                </div>
+                <div class="offcanvas-body pt-3 px-0">
+                    <div class="o_psd_group px-3 pt-2 pb-1">Tra cứu</div>
+                    <nav class="nav flex-column">
+                        <a href="/portal/home"
+                            class="o_psd_link d-flex align-items-center gap-2 {% if active_page == 'home' %}active{% endif %}">
+                            <i class="fa fa-home fa-fw" aria-hidden="true"></i>
+                            <span>Trang chủ</span>
+                        </a>
+                        <a href="/portal/search/serial"
+                            class="o_psd_link d-flex align-items-center gap-2 {% if active_page == 'serial' %}active{% endif %}">
+                            <i class="fa fa-barcode fa-fw" aria-hidden="true"></i>
+                            <span>Tra cứu số seri</span>
+                        </a>
+                        <a href="/portal/search/esd"
+                            class="o_psd_link d-flex align-items-center gap-2 {% if active_page == 'esd' %}active{% endif %}">
+                            <i class="fa fa-key fa-fw" aria-hidden="true"></i>
+                            <span>Tra cứu số ESD</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

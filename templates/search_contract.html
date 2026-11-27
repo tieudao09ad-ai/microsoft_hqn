@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Tra cứu theo Mã Hợp Đồng - HQN Software{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column gap-3">
+
+    <!-- Page Header -->
+    <section class="o_psd_navy rounded-3 p-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width:52px;height:52px;background:rgba(255,255,255,0.15);">
+                <i class="fa fa-file-text-o text-white fa-lg"></i>
+            </div>
+            <div>
+                <h4 class="text-white fw-bold mb-0">Tra cứu theo Mã Hợp Đồng</h4>
+                <p class="o_psd_text-dim mb-0 small">Kiểm tra danh sách key thuộc một lô cấp phép / hợp đồng</p>
+            </div>
+            <a href="/" class="btn btn-sm btn-outline-light ms-auto">
+                <i class="fa fa-home me-1"></i>Trang chủ
+            </a>
+        </div>
+    </section>
+
+    <!-- Search Form -->
+    <section class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+            <h6 class="fw-bold text-dark mb-0">
+                <i class="fa fa-search text-primary me-2"></i>Nhập mã hợp đồng / mã giao dịch
+            </h6>
+        </div>
+        <div class="card-body p-4 bg-light">
+            <form method="POST" action="/portal/api/search/contract">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-8">
+                        <label class="form-label fw-semibold small text-muted text-uppercase">Mã hợp đồng / Mã giao dịch</label>
+                        <input type="text"
+                               name="transaction_code"
+                               class="form-control form-control-lg font-monospace"
+                               placeholder="Ví dụ: HQN-ESD-20241101001"
+                               value="{{ query or '' }}"
+                               autocomplete="off"
+                               autofocus
+                               required>
+                        <div class="form-text">Nhập chính xác mã giao dịch hoặc mã hợp đồng do HQN Software cấp.</div>
+                    </div>
+                    <div class="col-lg-4">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fa fa-search me-2"></i>Tra cứu
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    {% if error %}
+    <!-- Error Alert -->
+    <div class="alert alert-danger d-flex align-items-center gap-2 rounded-3 shadow-sm border-0" role="alert">
+        <i class="fa fa-exclamation-circle fa-lg"></i>
+        <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    {% if result is defined and result is not none %}
+        {% if result.found %}
+        <!-- Results: Product Info Card -->
+        <section class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <div class="card-header py-3 px-4 d-flex align-items-center gap-2"
+                 style="background:linear-gradient(135deg,#0f4c8a 0%,#1a6bbf 100%);">
+                <i class="fa fa-check-circle text-success fa-lg"></i>
+                <span class="text-white fw-bold">Tìm thấy {{ result.total_keys }} key thuộc mã hợp đồng:
+                    <span class="font-monospace bg-white bg-opacity-25 px-2 py-0 rounded">{{ result.transaction_code }}</span>
+                </span>
+            </div>
+            {% if result.product_info %}
+            <div class="card-body p-4 bg-white">
+                <div class="row g-3">
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="border rounded-3 p-3 bg-light h-100">
+                            <div class="text-muted small fw-semibold text-uppercase mb-1">Mã Part</div>
+                            <div class="fw-bold font-monospace text-primary">{{ result.product_info.product_code or '—' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="border rounded-3 p-3 bg-light h-100">
+                            <div class="text-muted small fw-semibold text-uppercase mb-1">Ngày cấp</div>
+                            <div class="fw-semibold">{{ result.product_info.transaction_date or '—' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="border rounded-3 p-3 bg-light h-100">
+                            <div class="text-muted small fw-semibold text-uppercase mb-1">Nhà phân phối</div>
+                            <div class="fw-semibold">{{ result.product_info.reseller_name or 'HQN Software' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3">
+                        <div class="border rounded-3 p-3 bg-light h-100">
+                            <div class="text-muted small fw-semibold text-uppercase mb-1">Trạng thái</div>
+                            <span class="badge bg-success">{{ result.product_info.status or 'Hợp lệ' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="border rounded-3 p-3 bg-light">
+                            <div class="text-muted small fw-semibold text-uppercase mb-1">Tên sản phẩm</div>
+                            <div class="fw-bold text-dark">{{ result.product_info.name_vn or '—' }}</div>
+                            {% if result.product_info.name_en %}
+                            <div class="text-muted small mt-1">{{ result.product_info.name_en }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- IMPORTANT: Contact Notice Banner -->
+        <section class="alert border-0 rounded-3 shadow-sm mb-0 p-0 overflow-hidden" role="alert">
+            <div class="d-flex align-items-start gap-3 p-4"
+                 style="background:linear-gradient(135deg,#fff7ed 0%,#fef3c7 100%);border-left:5px solid #f59e0b;">
+                <div class="flex-shrink-0 mt-1">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:#fef3c7;color:#d97706;">
+                        <i class="fa fa-shield fa-lg"></i>
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold text-warning-emphasis mb-1" style="color:#92400e;">
+                        <i class="fa fa-lock me-1"></i>Key đã được bảo mật — Cần liên hệ để nhận key đầy đủ
+                    </h6>
+                    <p class="mb-2 text-dark" style="font-size:0.95rem;">
+                        Để bảo vệ tài sản bản quyền của doanh nghiệp, hệ thống chỉ hiển thị <strong>5 ký tự cuối</strong>
+                        của mỗi key. Vui lòng liên hệ trực tiếp <strong>HQN Software</strong> để nhận key đầy đủ
+                        kèm theo xác nhận hợp đồng.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="tel:0913370239" class="btn btn-sm btn-warning fw-bold">
+                            <i class="fa fa-phone me-1"></i>0913.370.239
+                        </a>
+                        <a href="mailto:hqngroup@gmail.com" class="btn btn-sm btn-outline-secondary fw-semibold">
+                            <i class="fa fa-envelope me-1"></i>hqngroup@gmail.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ESD Keys Table -->
+        {% if result.esd_keys %}
+        <section class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                <i class="fa fa-key text-info"></i>
+                <span class="fw-bold text-dark">Key Điện Tử (ESD)</span>
+                <span class="badge bg-info ms-1">{{ result.esd_keys|length }} key</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3 text-muted small text-uppercase" style="width:60px;">#</th>
+                                <th class="px-3 py-3 text-muted small text-uppercase">Key (đã che)</th>
+                                <th class="px-3 py-3 text-muted small text-uppercase">5 ký tự cuối</th>
+                                <th class="px-3 py-3 text-muted small text-uppercase">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in result.esd_keys %}
+                            <tr>
+                                <td class="px-4 py-3 text-muted">{{ loop.index }}</td>
+                                <td class="px-3 py-3">
+                                    <span class="font-monospace fw-bold text-secondary" style="letter-spacing:0.05em;">
+                                        {{ item.masked_key }}
+                                    </span>
+                                    <i class="fa fa-lock text-warning ms-2 small" title="Key đã được bảo mật"></i>
+                                </td>
+                                <td class="px-3 py-3">
+                                    <span class="badge bg-dark font-monospace fs-6 px-3 py-2">{{ item.last5 }}</span>
+                                </td>
+                                <td class="px-3 py-3">
+                                    <span class="badge bg-success">{{ item.status }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Physical Keys Table -->
+        {% if result.physical_keys %}
+        <section class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex align-items-center gap-2">
+                <i class="fa fa-barcode text-primary"></i>
+                <span class="fw-bold text-dark">Key Vật Lý (Số Seri)</span>
+                <span class="badge bg-primary ms-1">{{ result.physical_keys|length }} key</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3 text-muted small text-uppercase" style="width:60px;">#</th>
+                                <th class="px-3 py-3 text-muted small text-uppercase">Số Seri (đã che)</th>
+                                <th class="px-3 py-3 text-muted small text-uppercase">5 ký tự cuối</th>
+                                <th class="px-3 py-3 text-muted small text-uppercase">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in result.physical_keys %}
+                            <tr>
+                                <td class="px-4 py-3 text-muted">{{ loop.index }}</td>
+                                <td class="px-3 py-3">
+                                    <span class="font-monospace fw-bold text-secondary" style="letter-spacing:0.05em;">
+                                        {{ item.masked_key }}
+                                    </span>
+                                    <i class="fa fa-lock text-warning ms-2 small"></i>
+                                </td>
+                                <td class="px-3 py-3">
+                                    <span class="badge bg-dark font-monospace fs-6 px-3 py-2">{{ item.last5 }}</span>
+                                </td>
+                                <td class="px-3 py-3">
+                                    <span class="badge bg-success">{{ item.status }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        {% else %}
+        <!-- Not Found -->
+        <section class="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <div class="card-body p-5 text-center">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width:72px;height:72px;background:#fef2f2;color:#ef4444;">
+                    <i class="fa fa-times-circle fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-danger mb-2">Không tìm thấy dữ liệu</h5>
+                <p class="text-muted mb-4">
+                    Mã hợp đồng <strong class="font-monospace">{{ result.transaction_code }}</strong>
+                    không tồn tại trong hệ thống HQN Software.<br>
+                    Vui lòng kiểm tra lại mã hoặc liên hệ trực tiếp để được hỗ trợ.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center">
+                    <a href="tel:0913370239" class="btn btn-primary">
+                        <i class="fa fa-phone me-2"></i>0913.370.239
+                    </a>
+                    <a href="mailto:hqngroup@gmail.com" class="btn btn-outline-secondary">
+                        <i class="fa fa-envelope me-2"></i>hqngroup@gmail.com
+                    </a>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    {% endif %}
+
+</div>
+{% endblock %}

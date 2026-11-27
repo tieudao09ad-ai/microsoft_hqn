@@ -1,0 +1,280 @@
+/* ==========================================================================
+   PSD - Microsoft Reseller Portal Stylesheet
+   Reproducing https://microsoft.psd.com.vn/ styling and visual design
+   ========================================================================== */
+
+:root {
+  --psd-navy-dark: #091629;
+  --psd-navy: #0b1b33;
+  --psd-navy-light: #0f2743;
+  --psd-blue-primary: #0078d4;
+  --psd-blue-hover: #005a9e;
+  --psd-blue-accent: #378add;
+  --psd-text-dim: #a9bdd6;
+  --psd-grid-header: #0f766e;
+  --psd-sidebar-width: 240px;
+  --psd-topbar-height: 56px;
+}
+
+body {
+  font-family: "Inter", "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  color: #111827;
+  background-color: #f8fafc;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Layout Wrappers */
+.o_psd_portal {
+  min-height: 100vh;
+  display: flex;
+}
+
+/* Sidebar Styling */
+aside.o_psd_sidebar {
+  width: var(--psd-sidebar-width);
+  min-width: var(--psd-sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(180deg, var(--psd-navy-light) 0%, var(--psd-navy) 55%, var(--psd-navy-dark) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+}
+
+aside.o_psd_sidebar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 65% at 0% 0%, rgba(55, 138, 221, 0.18) 0%, rgba(55, 138, 221, 0) 70%);
+  pointer-events: none;
+}
+
+.o_psd_brand {
+  height: 70px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.o_psd_group {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.o_psd_link {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  padding: 10px 16px;
+  margin: 2px 8px;
+  border-radius: 6px;
+  transition: all 0.15s ease-in-out;
+}
+
+.o_psd_link i {
+  width: 20px;
+  text-align: center;
+  color: #94a3b8;
+  transition: color 0.15s ease;
+}
+
+.o_psd_link:hover {
+  color: #ffffff;
+  background-color: rgba(55, 138, 221, 0.12);
+  border-left-color: var(--psd-blue-accent);
+}
+
+.o_psd_link:hover i {
+  color: #ffffff;
+}
+
+.o_psd_link.active {
+  color: #ffffff;
+  background-color: rgba(55, 138, 221, 0.2);
+  border-left-color: var(--psd-blue-accent);
+  font-weight: 600;
+}
+
+.o_psd_link.active i {
+  color: var(--psd-blue-accent);
+}
+
+/* Offcanvas Mobile Sidebar */
+.offcanvas.o_psd_sidebar {
+  width: 260px;
+  background: linear-gradient(180deg, var(--psd-navy-light) 0%, var(--psd-navy) 55%, var(--psd-navy-dark) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Topbar */
+.o_psd_topbar {
+  height: var(--psd-topbar-height);
+  background: linear-gradient(180deg, var(--psd-navy-light) 0%, #0d223b 58%, var(--psd-navy) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 14px rgba(4, 10, 20, 0.25);
+  z-index: 90;
+}
+
+.o_psd_btn-ghost {
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+}
+
+.o_psd_btn-ghost:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.o_psd_avatar {
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.o_psd_avatar:hover {
+  background-color: rgba(55, 138, 221, 0.3);
+  color: #fff;
+}
+
+/* Breadcrumb */
+.breadcrumb .o_psd_breadcrumb_link {
+  color: var(--psd-blue-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+  transition: color 0.15s ease;
+}
+
+.breadcrumb .o_psd_breadcrumb_link:hover {
+  color: var(--psd-blue-hover);
+}
+
+/* Navy Hero and Banner Sections */
+.o_psd_navy {
+  background: linear-gradient(135deg, #0f2743 0%, #0b1b33 60%, #081528 100%);
+  box-shadow: 0 10px 25px rgba(11, 27, 51, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.o_psd_text-dim {
+  color: var(--psd-text-dim);
+}
+
+.o_psd_btn {
+  background-color: var(--psd-blue-primary);
+  border-color: var(--psd-blue-primary);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.6rem 1.4rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.o_psd_btn:hover {
+  background-color: var(--psd-blue-hover);
+  border-color: var(--psd-blue-hover);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 120, 212, 0.35);
+}
+
+/* AgGrid Replica Table */
+.psd_grid_container {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.psd_table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0;
+  font-size: 0.93rem;
+}
+
+.psd_table thead th {
+  background-color: var(--psd-grid-header);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 12px 14px;
+  text-align: left;
+  border: 1px solid #0d635c;
+  vertical-align: middle;
+  letter-spacing: 0.01em;
+}
+
+.psd_table tbody td {
+  padding: 11px 14px;
+  vertical-align: middle;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+}
+
+.psd_table tbody tr:nth-child(even) td {
+  background-color: #f9fafb;
+}
+
+.psd_table tbody tr:hover td {
+  background-color: #f0f7ff;
+}
+
+/* Status Badges */
+.o_psd_status_badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.o_psd_status_badge.genuine {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.o_psd_status_badge.invalid {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* Certificate Modal & Details */
+.modal-header-psd {
+  background: linear-gradient(135deg, #0f2743 0%, #0b1b33 100%);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Sample pills */
+.sample-pill {
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  background-color: #e2e8f0;
+  color: #334155;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.sample-pill:hover {
+  background-color: #cbd5e1;
+  color: #0f172a;
+}
+

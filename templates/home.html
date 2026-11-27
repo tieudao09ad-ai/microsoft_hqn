@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Trang chủ - Cổng tra cứu bản quyền Microsoft - HQN Software{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column gap-3">
+    <!-- Welcome Header Card -->
+    <section class="o_psd_navy rounded-3 p-4">
+        <div class="justify-content-between card-body p-2">
+            <h2 class="text-white text-uppercase text-center fw-semibold lh-sm mb-0" style="letter-spacing: 0.02em;">
+                Chào mừng bạn đến với trang portal - Microsoft
+            </h2>
+        </div>
+    </section>
+
+    <!-- Hero Introduction Section -->
+    <section class="o_psd_navy rounded-3 p-4 p-lg-5 text-center">
+        <div class="d-flex justify-content-center align-items-center gap-4 mb-4">
+            <img class="rounded bg-white p-2 shadow-sm" style="height:85px;width:auto;max-width:140px;object-fit:contain;" 
+                 src="/static/img/logo.png" alt="HQN Software"/>
+            <div style="width:2px;height:50px;background:rgba(255,255,255,0.2);"></div>
+            <img class="bg-white p-2 rounded shadow-sm" src="/static/img/microsoft_logo.png" alt="Microsoft" 
+                 style="height:85px;width:auto;object-fit:contain;"/>
+        </div>
+
+        <h2 class="text-white text-uppercase text-center fw-bold lh-sm mb-3" style="font-size: 1.65rem;">
+            HQN SOFTWARE - HỆ THỐNG XÁC THỰC BẢN QUYỀN MICROSOFT
+        </h2>
+        <p class="o_psd_text-dim text-center mb-4" style="font-size: 1.05rem;">
+            Hệ thống kiểm tra và xác nhận bản quyền phần mềm chính hãng từ HQN Software
+        </p>
+
+        <!-- Lookup CTA Buttons -->
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+            <a href="/portal/search/serial" class="btn btn-light o_psd_btn px-4 py-2 d-inline-flex align-items-center gap-2 shadow">
+                <i class="fa fa-barcode text-primary" style="font-size:1.2rem;"></i>
+                <span>Tra cứu số Seri (Key vật lý)</span>
+            </a>
+            <a href="/portal/search/esd" class="btn btn-outline-light px-4 py-2 d-inline-flex align-items-center gap-2">
+                <i class="fa fa-key text-info" style="font-size:1.1rem;"></i>
+                <span>Tra cứu số ESD (Key điện tử)</span>
+            </a>
+            <a href="/portal/search/contract" class="btn btn-outline-light px-4 py-2 d-inline-flex align-items-center gap-2">
+                <i class="fa fa-file-text-o text-warning" style="font-size:1.1rem;"></i>
+                <span>Tra cứu theo Mã Hợp Đồng</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- Banner: License Types (Genuine Guide) -->
+    <section id="psd-license-types" class="card border shadow-sm overflow-hidden rounded-3">
+        <img src="/static/img/1165-thumb.png" class="w-100" loading="lazy" alt="Nhận diện bản quyền chính hãng"/>
+    </section>
+
+    <!-- Official Banner 2: Lookup Guidelines (HTML replaces image for editable content) -->
+    <section class="card border shadow-sm overflow-hidden rounded-3">
+        <div class="p-4 p-lg-5" style="background:#eef0f8;">
+            <h3 class="text-center fw-bold mb-4" style="color:#1a1a2e;font-size:2.2rem;letter-spacing:-0.01em;">
+                Hướng dẫn tra cứu sản phẩm chính hãng
+            </h3>
+            <div class="row g-4 mb-4">
+                <!-- Bước 1 -->
+                <div class="col-md-4">
+                    <div class="bg-white rounded-3 p-4 h-100 shadow-sm text-center d-flex flex-column justify-content-center" style="min-height:150px;">
+                        <div class="fw-bold mb-2" style="font-size:1.45rem;color:#1a1a2e;">Bước 1</div>
+                        <div class="text-muted mb-2" style="font-size:1.15rem;">Truy cập Website:</div>
+                        <div>
+                            <a href="https://microsoft.hqn.com.vn/" target="_blank"
+                               class="fw-bold text-primary text-decoration-underline"
+                               style="font-size:1.15rem;word-break:break-all;">
+                                https://microsoft.hqn.com.vn/
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Bước 2 -->
+                <div class="col-md-4">
+                    <div class="bg-white rounded-3 p-4 h-100 shadow-sm text-center d-flex flex-column justify-content-center" style="min-height:150px;">
+                        <div class="fw-bold mb-2" style="font-size:1.45rem;color:#1a1a2e;">Bước 2</div>
+                        <div class="text-muted" style="font-size:1.15rem;line-height:1.6;">
+                            Nhấn vào mục "<a href="/portal/search/serial" class="text-primary text-decoration-underline fw-bold">Tra cứu số seri</a>"
+                        </div>
+                    </div>
+                </div>
+                <!-- Bước 3 -->
+                <div class="col-md-4">
+                    <div class="bg-white rounded-3 p-4 h-100 shadow-sm text-center d-flex flex-column justify-content-center" style="min-height:150px;">
+                        <div class="fw-bold mb-2" style="font-size:1.45rem;color:#1a1a2e;">Bước 3</div>
+                        <div class="text-muted" style="font-size:1.15rem;line-height:1.6;">
+                            Nhập số Seri vào thanh tra cứu
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Minh họa ảnh gốc bên dưới -->
+            <div class="rounded-3 overflow-hidden mt-3 shadow-sm">
+                <img src="/static/img/minh_hoa_seri.png" class="w-100" loading="lazy"
+                     alt="Ví dụ minh họa số seri Office và Windows"/>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Info Section -->
+    <section class="card border shadow-sm rounded-3 overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 border-bottom">
+            <h5 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                <i class="fa fa-address-book text-primary"></i>
+                <span>THÔNG TIN LIÊN HỆ</span>
+            </h5>
+        </div>
+        <div class="card-body p-4 bg-light">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm p-4 bg-white rounded-3 text-center">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px;height:60px;background:#e0f2fe;color:#0284c7;">
+                            <i class="fa fa-phone fa-2x"></i>
+                        </div>
+                        <h6 class="fw-bold text-muted text-uppercase mb-2" style="font-size:0.8rem;letter-spacing:0.05em;">Số điện thoại</h6>
+                        <a href="tel:0913370239" class="fs-4 fw-bold text-primary text-decoration-none">0913.370.239</a>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm p-4 bg-white rounded-3 text-center">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px;height:60px;background:#fef3c7;color:#d97706;">
+                            <i class="fa fa-envelope fa-2x"></i>
+                        </div>
+                        <h6 class="fw-bold text-muted text-uppercase mb-2" style="font-size:0.8rem;letter-spacing:0.05em;">Email</h6>
+                        <a href="mailto:hqngroup@gmail.com" class="fs-5 fw-bold text-dark text-decoration-none text-break">hqngroup@gmail.com</a>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm p-4 bg-white rounded-3 text-center">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width:60px;height:60px;background:#dcfce7;color:#16a34a;">
+                            <i class="fa fa-map-marker fa-2x"></i>
+                        </div>
+                        <h6 class="fw-bold text-muted text-uppercase mb-2" style="font-size:0.8rem;letter-spacing:0.05em;">Địa chỉ</h6>
+                        <div class="fw-bold text-dark" style="font-size:0.95rem;">NO04-LK192 Khu LK27-28, P. Dương Nội, Hà Nội</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

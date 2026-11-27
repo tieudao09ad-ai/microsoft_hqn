@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Tra cứu số ESD - Cổng thông tin Microsoft - HQN Software{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column gap-3">
+    <!-- Breadcrumb -->
+    <nav class="small text-uppercase" aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="/portal/home" class="o_psd_breadcrumb_link">Trang chủ</a>
+            </li>
+            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Tra cứu số ESD</li>
+        </ol>
+    </nav>
+
+    <!-- Search Form Card -->
+    <div class="card border shadow-sm rounded-3">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0 text-uppercase fw-bold text-dark" style="letter-spacing: -0.01em;">
+                    <i class="fa fa-key text-info me-2"></i>Tra cứu số ESD
+                </h4>
+                <span class="badge bg-light text-secondary border">Bản quyền điện tử (Electronic Software Delivery)</span>
+            </div>
+
+            <p class="text-muted mb-3" style="font-size:0.95rem;">
+                Nhập một hoặc nhiều số ESD (Mã key 25 ký tự hoặc Mã giao dịch ESD), cách nhau bằng dấu phẩy hoặc xuống dòng, sau đó nhấn <strong>Tìm kiếm</strong>.
+            </p>
+
+            <!-- Sample quick click pills -->
+            <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
+                <span class="small text-muted fw-semibold">Mẫu thử nghiệm có trong hệ thống:</span>
+                <span class="sample-pill" onclick="insertSample('VK7JG-NPHTM-C97JM-9MPGT-3V66T')">Key Win 11 Pro</span>
+                <span class="sample-pill" onclick="insertSample('HQN-ESD-TX88910')">Mã GD: HQN-ESD-TX88910</span>
+                <span class="sample-pill" onclick="insertSample('B7Q2P-K8NYM-Q3TWC-94X2R-V8HMF')">Key Office 2024</span>
+                <span class="sample-pill" onclick="insertSample('D9KP4-82NCV-TR77X-B2YWM-GQ92M')">Key M365 Business</span>
+                <span class="sample-pill" onclick="insertSample('ESD001\nESD002')">ESD001, ESD002</span>
+                <span class="sample-pill text-danger bg-danger-subtle" onclick="insertSample('AAAAA-BBBBB-CCCCC-DDDDD-EEEEE')">Key không tồn tại</span>
+            </div>
+
+            <div id="search-alert" class="alert alert-warning mb-3 d-none"></div>
+
+            <form id="search-form" class="mb-0" onsubmit="handleEsdSearch(event)">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-10">
+                        <textarea id="search-input" class="form-control font-monospace" rows="4" 
+                                  placeholder="ESD001&#10;ESD002 hoặc XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"></textarea>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" id="search-btn" class="btn btn-primary o_psd_btn w-100 py-3 shadow-sm">
+                            <span id="btn-text"><i class="fa fa-search me-1"></i> Tìm kiếm</span>
+                            <span id="btn-spinner" class="d-none"><i class="fa fa-spinner fa-spin me-1"></i> Đang tìm…</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search Results Grid Card -->
+    <div id="results-card" class="card border shadow-sm p-3 rounded-3 d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                <span>Kết quả tra cứu ESD</span>
+                <span id="results-count" class="badge bg-secondary">0 kết quả</span>
+            </h5>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="exportResultsCSV()">
+                    <i class="fa fa-file-excel-o me-1 text-success"></i> Xuất CSV
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearResults()">
+                    <i class="fa fa-trash-o me-1"></i> Xóa bảng
+                </button>
+            </div>
+        </div>
+
+        <div class="table-responsive psd_grid_container">
+            <table class="table psd_table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 70px; text-align: center;">STT</th>
+                        <th style="min-width: 170px;">Mã Giao Dịch</th>
+                        <th style="min-width: 130px;">Mã Sản Phẩm</th>
+                        <th style="min-width: 220px;">Tên Tiếng Anh</th>
+                        <th style="min-width: 240px;">Tên Tiếng Việt</th>
+                        <th style="min-width: 170px;">Thời gian giao dịch</th>
+                        <th style="min-width: 150px; text-align: center;">Trạng Thái</th>
+                        <th style="width: 90px; text-align: center;">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody id="results-tbody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ESD Certificate Details Modal -->
+<div class="modal fade" id="esdModal" tabindex="-1" aria-labelledby="esdModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-3 border-0 overflow-hidden shadow">
+            <div class="modal-header modal-header-psd text-white">
+                <div class="d-flex align-items-center gap-2">
+                    <img src="/static/img/logo.png" style="height:35px;background:#fff;border-radius:4px;padding:2px;"/>
+                    <h5 class="modal-title fw-bold" id="esdModalLabel">Chứng nhận phân phối bản quyền điện tử ESD</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="card border-0 shadow-sm p-4 bg-white rounded-3">
+                    <div class="text-center mb-4">
+                        <div id="modal-esd-status" class="mb-2"></div>
+                        <h4 class="fw-bold text-dark mb-1" id="modal-esd-vn"></h4>
+                        <div class="text-muted" id="modal-esd-en"></div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold">Mã Giao Dịch ESD</label>
+                            <div class="fs-5 fw-bold font-monospace text-primary" id="modal-tx-code"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold">Mã Sản Phẩm (Part Number)</label>
+                            <div class="fs-5 fw-bold font-monospace text-dark" id="modal-esd-part"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold">Khóa kích hoạt (Mã Key ESD)</label>
+                            <div class="fw-bold font-monospace text-success fs-5" id="modal-esd-key"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold">Thời gian cấp phép</label>
+                            <div class="fw-semibold text-dark" id="modal-tx-date"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold">Đại lý phân phối</label>
+                            <div class="fw-semibold text-dark" id="modal-reseller"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small text-uppercase fw-bold">Nhà Phân Phối Chính Thức</label>
+                            <div class="fw-semibold text-dark">HQN Software</div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4 mb-0">
+                        <h6 class="fw-bold mb-1"><i class="fa fa-info-circle me-1"></i> Hướng dẫn kích hoạt bản quyền:</h6>
+                        <ul class="mb-2 ps-3 small">
+                            <li>Đối với <strong>Windows 11 / Windows 10:</strong> Mở <em>Cài đặt (Settings) &rarr; Hệ thống (System) &rarr; Kích hoạt (Activation) &rarr; Thay đổi khóa sản phẩm</em>.</li>
+                            <li>Đối với <strong>Microsoft Office / Microsoft 365:</strong> Truy cập <strong><a href="https://setup.office.com" target="_blank" class="text-primary fw-bold">setup.office.com</a></strong>, đăng nhập tài khoản Microsoft và nhập mã key để liên kết bản quyền.</li>
+                        </ul>
+                        <div class="pt-2 border-top border-info border-opacity-25 small text-dark">
+                            <strong>Liên hệ:</strong> SĐT: <a href="tel:0913370239" class="fw-bold text-dark">0913.370.239</a> | Email: <a href="mailto:hqngroup@gmail.com" class="text-primary">hqngroup@gmail.com</a> | Địa chỉ: NO04-LK192 Khu LK27-28, P. Dương Nội, Hà Nội
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="fa fa-print me-1"></i> In chứng nhận ESD
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentResults = [];
+
+function insertSample(val) {
+    document.getElementById('search-input').value = val;
+    document.getElementById('search-form').dispatchEvent(new Event('submit', { cancelable: true }));
+}
+
+async function handleEsdSearch(ev) {
+    if (ev) ev.preventDefault();
+    const input = document.getElementById('search-input').value.trim();
+    const alertBox = document.getElementById('search-alert');
+    const searchBtn = document.getElementById('search-btn');
+    const btnText = document.getElementById('btn-text');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const resultsCard = document.getElementById('results-card');
+    const tbody = document.getElementById('results-tbody');
+    const countBadge = document.getElementById('results-count');
+
+    alertBox.classList.add('d-none');
+
+    if (!input) {
+        alertBox.textContent = 'Vui lòng nhập ít nhất một số ESD hoặc mã giao dịch để kiểm tra.';
+        alertBox.classList.remove('d-none');
+        return;
+    }
+
+    // Set loading
+    searchBtn.disabled = true;
+    btnText.classList.add('d-none');
+    btnSpinner.classList.remove('d-none');
+
+    try {
+        const response = await fetch('/portal/api/search/esd', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ value: input })
+        });
+        const data = await response.json();
+
+        currentResults = data.rows || [];
+        tbody.innerHTML = '';
+
+        if (currentResults.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">Không tìm thấy dữ liệu.</td></tr>`;
+        } else {
+            currentResults.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                const isVal = row.is_valid;
+                const statusHtml = isVal 
+                    ? `<span class="o_psd_status_badge genuine"><i class="fa fa-check-circle"></i> ${row.status}</span>`
+                    : `<span class="o_psd_status_badge invalid"><i class="fa fa-times-circle"></i> ${row.status}</span>`;
+
+                tr.innerHTML = `
+                    <td style="text-align:center; font-weight:600;">${row.no}</td>
+                    <td><strong class="font-monospace text-primary">${row.origin_name}</strong></td>
+                    <td><span class="badge bg-light text-dark border font-monospace">${row.default_code}</span></td>
+                    <td class="fw-medium">${row.name}</td>
+                    <td class="text-secondary">${row.vn_name}</td>
+                    <td class="small font-monospace">${row.date_done}</td>
+                    <td style="text-align:center;">${statusHtml}</td>
+                    <td style="text-align:center;">
+                        ${isVal ? `<button class="btn btn-sm btn-outline-info" onclick="showModal(${index})"><i class="fa fa-info-circle"></i></button>` : '—'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        countBadge.textContent = `${currentResults.length} kết quả (${currentResults.filter(r => r.is_valid).length} hợp lệ)`;
+        resultsCard.classList.remove('d-none');
+        resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+        alertBox.textContent = 'Đã có lỗi xảy ra trong quá trình tra cứu. Vui lòng thử lại sau.';
+        alertBox.classList.remove('d-none');
+    } finally {
+        searchBtn.disabled = false;
+        btnText.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+    }
+}
+
+function showModal(index) {
+    const item = currentResults[index];
+    if (!item || !item.is_valid) return;
+
+    document.getElementById('modal-esd-status').innerHTML = `<span class="o_psd_status_badge genuine fs-6"><i class="fa fa-check-circle"></i> ${item.status}</span>`;
+    document.getElementById('modal-esd-vn').textContent = item.vn_name;
+    document.getElementById('modal-esd-en').textContent = item.name;
+    document.getElementById('modal-tx-code').textContent = item.origin_name;
+    document.getElementById('modal-esd-part').textContent = item.default_code;
+    document.getElementById('modal-esd-key').textContent = item.esd_key;
+    document.getElementById('modal-tx-date').textContent = item.date_done;
+    document.getElementById('modal-reseller').textContent = item.reseller_name || 'Đại lý ủy quyền HQN Software';
+
+    const modal = new bootstrap.Modal(document.getElementById('esdModal'));
+    modal.show();
+}
+
+function clearResults() {
+    currentResults = [];
+    document.getElementById('results-tbody').innerHTML = '';
+    document.getElementById('results-card').classList.add('d-none');
+    document.getElementById('search-input').value = '';
+}
+
+function exportResultsCSV() {
+    if (!currentResults || currentResults.length === 0) return;
+    let csv = "STT,Ma Giao Dich,Ma San Pham,Ten Tieng Anh,Ten Tieng Viet,Thoi Gian,Trang Thai\n";
+    currentResults.forEach(r => {
+        csv += `"${r.no}","${r.origin_name}","${r.default_code}","${r.name}","${r.vn_name}","${r.date_done}","${r.status}"\n`;
+    });
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `HQN_Tra_Cuu_ESD_${Date.now()}.csv`;
+    link.click();
+}
+</script>
+{% endblock %}
+
